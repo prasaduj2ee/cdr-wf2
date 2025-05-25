@@ -31,7 +31,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Run Checkstyle and PMD (continue on violations)
-        run: gradlew checkstyleMain pmdMain || true
+        run: ./gradlew checkstyleMain pmdMain || true
 
       # ✅ Upload Checkstyle Reports
       - name: Upload Checkstyle HTML Report
