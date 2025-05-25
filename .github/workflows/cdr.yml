@@ -20,7 +20,7 @@ jobs:
         with:
           repository: prasaduj2ee/cdr-wf-util
           token: ${{ secrets.CDR2_TKN1 }}  # store a PAT in Repo A secrets
-
+          path: util-scripts
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -32,7 +32,7 @@ jobs:
         run: chmod +x cdr-wf-util/gradlew
 
       - name: Run Checkstyle and PMD (continue on violations)
-        run: cdr-wf-util/gradlew checkstyleMain pmdMain || true
+        run: util-scripts/gradlew checkstyleMain pmdMain || true
 
       # ✅ Upload Checkstyle Reports
       - name: Upload Checkstyle HTML Report
@@ -40,14 +40,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: checkstyle-html
-          path: cdr-wf-util/build/reports/checkstyle/main.html
+          path: build/reports/checkstyle/main.html
 
       - name: Upload Checkstyle XML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: checkstyle-xml
-          path: cdr-wf-util/build/reports/checkstyle/main.xml
+          path: build/reports/checkstyle/main.xml
 
       # ✅ Upload PMD Reports
       - name: Upload PMD HTML Report
@@ -55,14 +55,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pmd-html
-          path: cdr-wf-util/build/reports/pmd/main.html
+          path: build/reports/pmd/main.html
 
       - name: Upload PMD XML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pmd-xml
-          path: cdr-wf-util/build/reports/pmd/main.xml
+          path: build/reports/pmd/main.xml
 
       - name: Install Python dependencies
         run: |
@@ -70,7 +70,7 @@ jobs:
           pip install requests openai
 
       - name: Post comments for static analysis violations
-        run: python cdr-wf-util/scripts/comment_on_violations.py
+        run: python util-scripts/scripts/comment_on_violations.py
         env:
           GITHUB_TOKEN: ${{ secrets.CDR1_TKN }}
           COMMIT_SHA: ${{ github.sha }}
