@@ -20,7 +20,7 @@ jobs:
         with:
           repository: prasaduj2ee/cdr-wf-util
           token: ${{ secrets.CDR2_TKN1 }}  # store a PAT in Repo A secrets
-          path: cdr-wf-util
+
 
       - name: Set up JDK
         uses: actions/setup-java@v4
