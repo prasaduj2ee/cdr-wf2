@@ -15,6 +15,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Checkout Repo B (shared build scripts)
+        uses: actions/checkout@v4
+        with:
+          repository: prasaduj2ee/cdr-wf-util
+          token: ${{ secrets.cdr2-tkn1 }}  # store a PAT in Repo A secrets
+          path: cdr-wf-util
+
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
@@ -22,10 +29,10 @@ jobs:
           java-version: '17'
 
       - name: Grant execute permission to gradlew
-        run: chmod +x ./gradlew
+        run: chmod +x cdr-wf-util/gradlew
 
       - name: Run Checkstyle and PMD (continue on violations)
-        run: ./gradlew checkstyleMain pmdMain || true
+        run: cdr-wf-util/gradlew checkstyleMain pmdMain || true
 
       # ✅ Upload Checkstyle Reports
       - name: Upload Checkstyle HTML Report
@@ -33,14 +40,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: checkstyle-html
-          path: build/reports/checkstyle/main.html
+          path: cdr-wf-util/build/reports/checkstyle/main.html
 
       - name: Upload Checkstyle XML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: checkstyle-xml
-          path: build/reports/checkstyle/main.xml
+          path: cdr-wf-util/build/reports/checkstyle/main.xml
 
       # ✅ Upload PMD Reports
       - name: Upload PMD HTML Report
@@ -48,14 +55,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pmd-html
-          path: build/reports/pmd/main.html
+          path: cdr-wf-util/build/reports/pmd/main.html
 
       - name: Upload PMD XML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pmd-xml
-          path: build/reports/pmd/main.xml
+          path: cdr-wf-util/build/reports/pmd/main.xml
 
       - name: Install Python dependencies
         run: |
@@ -63,17 +70,8 @@ jobs:
           pip install requests openai
 
       - name: Post comments for static analysis violations
-        run: python scripts/comment_on_violations.py
+        run: python cdr-wf-util/scripts/comment_on_violations.py
         env:
           GITHUB_TOKEN: ${{ secrets.CDR1_TKN }}
           COMMIT_SHA: ${{ github.sha }}
           REPO: ${{ github.repository }}
-
-      - name: AI Code Review with OpenAI
-        if: github.event_name == 'pull_request'
-        run: python scripts/review_changes.py
-        env:
-          OA_TKN: ${{ secrets.OA_TKN }}
-          GITHUB_TOKEN: ${{ secrets.CDR1_TKN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_REF: ${{ github.ref }}
