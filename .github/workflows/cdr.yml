@@ -20,6 +20,7 @@ jobs:
         with:
           repository: prasaduj2ee/cdr-wf-util
           token: ${{ secrets.CDR2_TKN1 }}  # store a PAT in Repo A secrets
+          path: util
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -31,7 +32,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Run Checkstyle and PMD (continue on violations)
-        run: ./gradlew checkstyleMain pmdMain || true
+        run: ./gradlew -b util/build.gradle checkstyleMain pmdMain || true
 
       # ✅ Upload Checkstyle Reports
       - name: Upload Checkstyle HTML Report
