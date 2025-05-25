@@ -31,10 +31,6 @@ jobs:
       - name: Grant execute permission to gradlew
         run: chmod +x ./gradlew
 
-      - name: Debug file structure
-        run: |
-          ls -R .
-
       - name: Run Checkstyle and PMD (continue on violations)
         run: ./gradlew -b util/build.gradle checkstyleMain pmdMain || true
 
