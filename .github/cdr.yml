@@ -1,0 +1,79 @@
+name: Java Code Review with Gradle + GitHub API Comments
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:  # Required for AI review step
+    types: [opened, synchronize]
+
+jobs:
+  code-review:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Grant execute permission to gradlew
+        run: chmod +x ./gradlew
+
+      - name: Run Checkstyle and PMD (continue on violations)
+        run: ./gradlew checkstyleMain pmdMain || true
+
+      # ✅ Upload Checkstyle Reports
+      - name: Upload Checkstyle HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkstyle-html
+          path: build/reports/checkstyle/main.html
+
+      - name: Upload Checkstyle XML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkstyle-xml
+          path: build/reports/checkstyle/main.xml
+
+      # ✅ Upload PMD Reports
+      - name: Upload PMD HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pmd-html
+          path: build/reports/pmd/main.html
+
+      - name: Upload PMD XML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pmd-xml
+          path: build/reports/pmd/main.xml
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install requests openai
+
+      - name: Post comments for static analysis violations
+        run: python scripts/comment_on_violations.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.CDR1_TKN }}
+          COMMIT_SHA: ${{ github.sha }}
+          REPO: ${{ github.repository }}
+
+      - name: AI Code Review with OpenAI
+        if: github.event_name == 'pull_request'
+        run: python scripts/review_changes.py
+        env:
+          OA_TKN: ${{ secrets.OA_TKN }}
+          GITHUB_TOKEN: ${{ secrets.CDR1_TKN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REF: ${{ github.ref }}
