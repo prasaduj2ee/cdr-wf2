@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: prasaduj2ee/cdr-wf-util
-          token: ${{ secrets.cdr2-tkn1 }}  # store a PAT in Repo A secrets
+          token: ${{ secrets.CDR2_TKN1 }}  # store a PAT in Repo A secrets
           path: cdr-wf-util
 
       - name: Set up JDK
