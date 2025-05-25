@@ -20,7 +20,6 @@ jobs:
         with:
           repository: prasaduj2ee/cdr-wf-util
           token: ${{ secrets.CDR2_TKN1 }}  # store a PAT in Repo A secrets
-          path: util-scripts
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -29,10 +28,10 @@ jobs:
           java-version: '17'
 
       - name: Grant execute permission to gradlew
-        run: chmod +x util-scripts/gradlew
+        run: chmod +x ./gradlew
 
       - name: Run Checkstyle and PMD (continue on violations)
-        run: util-scripts/gradlew checkstyleMain pmdMain || true
+        run: gradlew checkstyleMain pmdMain || true
 
       # ✅ Upload Checkstyle Reports
       - name: Upload Checkstyle HTML Report
@@ -70,7 +69,7 @@ jobs:
           pip install requests openai
 
       - name: Post comments for static analysis violations
-        run: python util-scripts/scripts/comment_on_violations.py
+        run: python scripts/comment_on_violations.py
         env:
           GITHUB_TOKEN: ${{ secrets.CDR2_TKN1 }}
           COMMIT_SHA: ${{ github.sha }}
