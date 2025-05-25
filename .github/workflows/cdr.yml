@@ -29,7 +29,7 @@ jobs:
           java-version: '17'
 
       - name: Grant execute permission to gradlew
-        run: chmod +x cdr-wf-util/gradlew
+        run: chmod +x util-scripts/gradlew
 
       - name: Run Checkstyle and PMD (continue on violations)
         run: util-scripts/gradlew checkstyleMain pmdMain || true
