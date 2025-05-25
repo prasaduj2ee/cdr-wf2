@@ -72,6 +72,6 @@ jobs:
       - name: Post comments for static analysis violations
         run: python util-scripts/scripts/comment_on_violations.py
         env:
-          GITHUB_TOKEN: ${{ secrets.CDR1_TKN }}
+          GITHUB_TOKEN: ${{ secrets.CDR2_TKN1 }}
           COMMIT_SHA: ${{ github.sha }}
           REPO: ${{ github.repository }}
