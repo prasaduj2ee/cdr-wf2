@@ -20,15 +20,15 @@ jobs:
         with:
           repository: prasaduj2ee/cdr-wf-util
           token: ${{ secrets.CDR2_TKN1 }}  # store a PAT in Repo A secrets
-          path: util
+          path: cdr-wf-util
 
       - name: Generate cdr_build.gradle for Checkstyle/PMD
         run: |
           echo "📄 Copying main build.gradle..."
-          cp build.gradle util/cdr_build.gradle
-          # Remove util/src if it exists to avoid merge issues
-          rm -rf util/src
-          cp -r src util/src
+          cp build.gradle cdr-wf-util/cdr_build.gradle
+          # Remove cdr-wf-util/src if it exists to avoid merge issues
+          rm -rf cdr-wf-util/src
+          cp -r src cdr-wf-util/src
 
           echo "🛠️ Injecting Checkstyle and PMD plugins with comment inside plugins block..."
           awk '
@@ -47,19 +47,19 @@ jobs:
               inside_plugins = 0
             }
             print
-          }' build.gradle > util/cdr_build.gradle.tmp
+          }' build.gradle > cdr-wf-cdr-wf-util/cdr_build.gradle.tmp
 
-          mv util/cdr_build.gradle.tmp util/cdr_build.gradle
+          mv cdr-wf-util/cdr_build.gradle.tmp cdr-wf-util/cdr_build.gradle
 
           echo "📝 Adding comment before appending chk_pmd.gradle..."
-          printf "\n// Added by CI: static analysis config from chk_pmd.gradle\n\n" >> util/cdr_build.gradle
+          printf "\n// Added by CI: static analysis config from chk_pmd.gradle\n\n" >> cdr-wf-util/cdr_build.gradle
 
           echo "📎 Appending chk_pmd.gradle content..."
-          cat util/chk_pmd.gradle >> util/cdr_build.gradle
+          cat cdr-wf-util/chk_pmd.gradle >> cdr-wf-util/cdr_build.gradle
 
           #echo "✅ Final cdr_build.gradle content:"
           #echo "--------------------------------------------------"
-          #cat util/cdr_build.gradle
+          #cat cdr-wf-util/cdr_build.gradle
           #echo "--------------------------------------------------"
 
       - name: Set up JDK
@@ -72,7 +72,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Run Checkstyle and PMD (continue on violations)
-        run: ./gradlew -b util/cdr_build.gradle checkstyleMain pmdMain || true
+        run: ./gradlew -b cdr-wf-util/cdr_build.gradle checkstyleMain pmdMain || true
 
       # ✅ Upload Checkstyle Reports
       - name: Upload Checkstyle HTML Report
@@ -80,14 +80,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: checkstyle-html
-          path: util/build/reports/checkstyle/main.html
+          path: cdr-wf-util/build/reports/checkstyle/main.html
 
       - name: Upload Checkstyle XML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: checkstyle-xml
-          path: util/build/reports/checkstyle/main.xml
+          path: cdr-wf-util/build/reports/checkstyle/main.xml
 
       # ✅ Upload PMD Reports
       - name: Upload PMD HTML Report
@@ -95,14 +95,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pmd-html
-          path: util/build/reports/pmd/main.html
+          path: cdr-wf-util/build/reports/pmd/main.html
 
       - name: Upload PMD XML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pmd-xml
-          path: util/build/reports/pmd/main.xml
+          path: cdr-wf-util/build/reports/pmd/main.xml
 
       - name: Install Python dependencies
         run: |
@@ -110,7 +110,7 @@ jobs:
           pip install requests openai
 
       - name: Post comments for static analysis violations
-        run: python util/scripts/comment_on_violations.py
+        run: python cdr-wf-util/scripts/comment_on_violations.py
         env:
           GITHUB_TOKEN: ${{ secrets.CDR2_TKN1 }}
           COMMIT_SHA: ${{ github.sha }}
