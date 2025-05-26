@@ -22,6 +22,28 @@ jobs:
           token: ${{ secrets.CDR2_TKN1 }}  # store a PAT in Repo A secrets
           path: util
 
+      - name: Generate cdr_build.gradle for Checkstyle/PMD
+        run: |
+          cp build.gradle util/cdr_build.gradle
+
+          awk '
+          BEGIN { inPlugins = 0 }
+          {
+              print
+              if ($0 ~ /plugins\s*{/) {
+                  inPlugins = 1
+              }
+              if (inPlugins && $0 ~ /}/) {
+                  print "    id '\''checkstyle'\''"
+                  print "    id '\''pmd'\''"
+                  inPlugins = 0
+              }
+          }' build.gradle > util/cdr_build.gradle.tmp
+
+          mv util/cdr_build.gradle.tmp util/cdr_build.gradle
+
+          cat util/chk_pmd.gradle >> util/cdr_build.gradle
+
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
@@ -32,7 +54,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Run Checkstyle and PMD (continue on violations)
-        run: ./gradlew -b util/build.gradle checkstyleMain pmdMain || true
+        run: ./gradlew -b util/cdr_build.gradle checkstyleMain pmdMain || true
 
       # ✅ Upload Checkstyle Reports
       - name: Upload Checkstyle HTML Report
