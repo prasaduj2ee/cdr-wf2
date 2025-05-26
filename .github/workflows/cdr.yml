@@ -24,8 +24,10 @@ jobs:
 
       - name: Generate cdr_build.gradle for Checkstyle/PMD
         run: |
+          echo "📄 Copying main build.gradle..."
           cp build.gradle util/cdr_build.gradle
 
+          echo "🛠️ Injecting Checkstyle and PMD plugins..."
           awk '
           BEGIN { inPlugins = 0 }
           {
@@ -42,7 +44,13 @@ jobs:
 
           mv util/cdr_build.gradle.tmp util/cdr_build.gradle
 
+          echo "📎 Appending chk_pmd.gradle..."
           cat util/chk_pmd.gradle >> util/cdr_build.gradle
+
+          echo "✅ Final cdr_build.gradle content:"
+          echo "--------------------------------------------------"
+          cat util/cdr_build.gradle
+          echo "--------------------------------------------------"      
 
       - name: Set up JDK
         uses: actions/setup-java@v4
