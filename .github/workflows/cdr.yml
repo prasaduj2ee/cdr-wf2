@@ -62,14 +62,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: checkstyle-html
-          path: build/reports/checkstyle/main.html
+          path: util/build/reports/checkstyle/main.html
 
       - name: Upload Checkstyle XML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: checkstyle-xml
-          path: build/reports/checkstyle/main.xml
+          path: util/build/reports/checkstyle/main.xml
 
       # ✅ Upload PMD Reports
       - name: Upload PMD HTML Report
@@ -77,14 +77,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pmd-html
-          path: build/reports/pmd/main.html
+          path: util/build/reports/pmd/main.html
 
       - name: Upload PMD XML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pmd-xml
-          path: build/reports/pmd/main.xml
+          path: util/build/reports/pmd/main.xml
 
       - name: Install Python dependencies
         run: |
