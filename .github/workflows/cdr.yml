@@ -57,10 +57,10 @@ jobs:
           echo "📎 Appending chk_pmd.gradle content..."
           cat util/chk_pmd.gradle >> util/cdr_build.gradle
 
-          echo "✅ Final cdr_build.gradle content:"
-          echo "--------------------------------------------------"
-          cat util/cdr_build.gradle
-          echo "--------------------------------------------------"
+          #echo "✅ Final cdr_build.gradle content:"
+          #echo "--------------------------------------------------"
+          #cat util/cdr_build.gradle
+          #echo "--------------------------------------------------"
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -110,7 +110,7 @@ jobs:
           pip install requests openai
 
       - name: Post comments for static analysis violations
-        run: python scripts/comment_on_violations.py
+        run: python util/scripts/comment_on_violations.py
         env:
           GITHUB_TOKEN: ${{ secrets.CDR2_TKN1 }}
           COMMIT_SHA: ${{ github.sha }}
