@@ -27,30 +27,37 @@ jobs:
           echo "📄 Copying main build.gradle..."
           cp build.gradle util/cdr_build.gradle
 
-          echo "🛠️ Injecting Checkstyle and PMD plugins..."
+          echo "🛠️ Injecting Checkstyle and PMD plugins with comment inside plugins block..."
           awk '
-          BEGIN { inPlugins = 0 }
+          BEGIN { inside_plugins = 0 }
           {
+            if ($0 ~ /^[[:space:]]*plugins[[:space:]]*{/) {
+              inside_plugins = 1
               print
-              if ($0 ~ /plugins\s*{/) {
-                  inPlugins = 1
-              }
-              if (inPlugins && $0 ~ /}/) {
-                  print "    id '\''checkstyle'\''"
-                  print "    id '\''pmd'\''"
-                  inPlugins = 0
-              }
+              next
+            }
+            if (inside_plugins && $0 ~ /^[[:space:]]*}/) {
+              # before closing brace, inject plugins with comment
+              printf "    // Added by CI: static analysis plugins\n"
+              printf "    id '\''checkstyle'\''\n"
+              printf "    id '\''pmd'\''\n"
+              inside_plugins = 0
+            }
+            print
           }' build.gradle > util/cdr_build.gradle.tmp
 
           mv util/cdr_build.gradle.tmp util/cdr_build.gradle
 
-          echo "📎 Appending chk_pmd.gradle..."
+          echo "📝 Adding comment before appending chk_pmd.gradle..."
+          printf "\n// Added by CI: static analysis config from chk_pmd.gradle\n\n" >> util/cdr_build.gradle
+
+          echo "📎 Appending chk_pmd.gradle content..."
           cat util/chk_pmd.gradle >> util/cdr_build.gradle
 
           echo "✅ Final cdr_build.gradle content:"
           echo "--------------------------------------------------"
           cat util/cdr_build.gradle
-          echo "--------------------------------------------------"      
+          echo "--------------------------------------------------"
 
       - name: Set up JDK
         uses: actions/setup-java@v4
