@@ -47,7 +47,7 @@ jobs:
               inside_plugins = 0
             }
             print
-          }' build.gradle > cdr-wf-cdr-wf-util/cdr_build.gradle.tmp
+          }' build.gradle > cdr-wf-util/cdr_build.gradle.tmp
 
           mv cdr-wf-util/cdr_build.gradle.tmp cdr-wf-util/cdr_build.gradle
 
