@@ -26,6 +26,9 @@ jobs:
         run: |
           echo "📄 Copying main build.gradle..."
           cp build.gradle util/cdr_build.gradle
+          # Remove util/src if it exists to avoid merge issues
+          rm -rf util/src
+          cp -r src util/src
 
           echo "🛠️ Injecting Checkstyle and PMD plugins with comment inside plugins block..."
           awk '
