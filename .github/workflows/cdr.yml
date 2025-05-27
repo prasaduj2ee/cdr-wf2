@@ -12,24 +12,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout main repository (Repo A)
         uses: actions/checkout@v4
 
-      - name: Checkout Repo B (shared build scripts)
-        uses: actions/checkout@v4
-        with:
-          repository: prasaduj2ee/cdr-wf-util
-          token: ${{ secrets.CDR2_TKN1 }}
-          path: cdr-wf-util
-
-      - name: Prepare util directory and generate cdr_build.gradle
+      - name: Checkout only cdr_config_util folder from Repo B
         run: |
-          echo "📄 Copying build.gradle and src folder to util/"
-          cp build.gradle cdr-wf-util/build.gradle
-          rm -rf cdr-wf-util/src
-          cp -r src cdr-wf-util/src
+          mkdir cdr_config_util
+          cd cdr_config_util
+          git init
+          git remote add origin https://x-access-token:${{ secrets.CDR_WF_UTIL2_TKN_FOR_CDR_WF2 }}@github.com/prasaduj2ee/cdr-wf-util2.git
+          git cdr_config_util core.sparseCheckout true
+          echo "cdr_config_util/" >> .git/info/sparse-checkout
+          git pull origin main
+          mv cdr_config_util/* ../cdr_config_util
+          cd ..
+          rm -rf cdr_config_util/.git
 
-          echo "🛠️ Injecting Checkstyle and PMD plugins into cdr_build.gradle..."
+      - name: Generate cdr_build.gradle in root
+        run: |
+          echo "🛠️ Creating cdr_build.gradle with static analysis plugins..."
+
           awk '
           BEGIN { inside_plugins = 0 }
           {
@@ -39,18 +41,17 @@ jobs:
               next
             }
             if (inside_plugins && $0 ~ /^[[:space:]]*}/) {
-              printf "    // Added by CI: static analysis plugins\n"
-              printf "    id '\''checkstyle'\''\n"
-              printf "    id '\''pmd'\''\n"
+              print "    // Added by CI: static analysis plugins"
+              print "    id '\''checkstyle'\''"
+              print "    id '\''pmd'\''"
               inside_plugins = 0
             }
             print
-          }' build.gradle > cdr-wf-util/cdr_build.gradle.tmp
+          }' build.gradle > cdr_build.gradle.tmp
 
-          mv cdr-wf-util/cdr_build.gradle.tmp cdr-wf-util/cdr_build.gradle
-
-          printf "\n// Added by CI: static analysis config from chk_pmd.gradle\n\n" >> cdr-wf-util/cdr_build.gradle
-          cat cdr-wf-util/chk_pmd.gradle >> cdr-wf-util/cdr_build.gradle
+          mv cdr_build.gradle.tmp cdr_build.gradle
+          echo -e "\n// Added by CI: static analysis cdr_config_util from chk_pmd.gradle\n" >> cdr_build.gradle
+          cat cdr_config_util/chk_pmd.gradle >> cdr_build.gradle
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -62,35 +63,35 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Run Checkstyle and PMD (continue on violations)
-        run: ./gradlew -b cdr-wf-util/cdr_build.gradle checkstyleMain pmdMain || true
+        run: ./gradlew -b cdr_build.gradle checkstyleMain pmdMain || true
 
       - name: Upload Checkstyle HTML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: checkstyle-html
-          path: cdr-wf-util/build/reports/checkstyle/main.html
+          path: build/reports/checkstyle/main.html
 
       - name: Upload Checkstyle XML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: checkstyle-xml
-          path: cdr-wf-util/build/reports/checkstyle/main.xml
+          path: build/reports/checkstyle/main.xml
 
       - name: Upload PMD HTML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pmd-html
-          path: cdr-wf-util/build/reports/pmd/main.html
+          path: build/reports/pmd/main.html
 
       - name: Upload PMD XML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pmd-xml
-          path: cdr-wf-util/build/reports/pmd/main.xml
+          path: build/reports/pmd/main.xml
 
       - name: Install Python dependencies
         run: |
@@ -98,7 +99,7 @@ jobs:
           pip install requests openai
 
       - name: Post PR comment with static analysis results
-        run: python cdr-wf-util/scripts/comment_on_violations.py
+        run: python cdr_config_util/scripts/comment_on_violations.py
         env:
           GITHUB_TOKEN: ${{ secrets.CDR2_TKN1 }}
           REPO: ${{ github.repository }}
