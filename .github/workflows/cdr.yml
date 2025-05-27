@@ -49,7 +49,7 @@ jobs:
 
           mv cdr-wf-util/cdr_build.gradle.tmp cdr-wf-util/cdr_build.gradle
 
-          printf "\n// Added by CI: static analysis config from chk_pmd.gradle\n\n" >> cdr-wf-util/cdr_build.gradle
+          printf "\n// Added by CI: static analysis config from chk_pmd.gradle\n\n" >> cdr_build.gradle
           cat cdr-wf-util/chk_pmd.gradle >> cdr-wf-util/cdr_build.gradle
 
       - name: Set up JDK
