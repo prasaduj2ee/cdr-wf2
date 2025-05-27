@@ -115,5 +115,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CDR2_TKN1 }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          COMMIT_SHA: ${{ github.sha }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
           GITHUB_REF: ${{ github.ref }}
