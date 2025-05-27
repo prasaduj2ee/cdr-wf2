@@ -20,12 +20,9 @@ jobs:
         with:
           repository: prasaduj2ee/cdr-wf-util2
           token: ${{ secrets.CDR_WF_UTIL2_TKN_FOR_CDR_WF2 }}
-          path: cdr-wf-util
 
       - name: Prepare util directory and generate cdr_build.gradle
-        run: |
-          echo "📄 Copying build.gradle and src folder to util/"
-          
+        run: |          
           echo "🛠️ Injecting Checkstyle and PMD plugins into cdr_build.gradle..."
           awk '
           BEGIN { inside_plugins = 0 }
@@ -47,7 +44,7 @@ jobs:
           mv cdr_build.gradle.tmp cdr_build.gradle
 
           printf "\n// Added by CI: static analysis config from chk_pmd.gradle\n\n" >> cdr_build.gradle
-          cat cdr-wf-util/chk_pmd.gradle >> cdr_build.gradle
+          cat cdr-wf-util/cdr_config_util/chk_pmd.gradle >> cdr_build.gradle
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -95,7 +92,7 @@ jobs:
           pip install requests openai
 
       - name: Post PR comment with static analysis results
-        run: python cdr-wf-util/scripts/comment_on_violations.py
+        run: python cdr-wf-util/cdr_config_util/scripts/comment_on_violations.py
         env:
           GITHUB_TOKEN: ${{ secrets.CDR2_TKN1 }}
           REPO: ${{ github.repository }}
