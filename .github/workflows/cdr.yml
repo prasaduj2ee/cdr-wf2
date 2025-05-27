@@ -18,8 +18,8 @@ jobs:
       - name: Checkout Repo B (shared build scripts)
         uses: actions/checkout@v4
         with:
-          repository: prasaduj2ee/cdr-wf-util
-          token: ${{ secrets.CDR2_TKN1 }}
+          repository: prasaduj2ee/cdr-wf-util2
+          token: ${{ secrets.CDR_WF_UTIL2_TKN_FOR_CDR_WF2 }}
           path: cdr-wf-util
 
       - name: Prepare util directory and generate cdr_build.gradle
@@ -44,7 +44,7 @@ jobs:
             print
           }' build.gradle > cdr_build.gradle.tmp
 
-          mv cdr-wf-util/cdr_build.gradle.tmp cdr-wf-util/cdr_build.gradle
+          mv cdr_build.gradle.tmp cdr_build.gradle
 
           printf "\n// Added by CI: static analysis config from chk_pmd.gradle\n\n" >> cdr_build.gradle
           cat cdr-wf-util/chk_pmd.gradle >> cdr_build.gradle
@@ -59,35 +59,35 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Run Checkstyle and PMD (continue on violations)
-        run: ./gradlew -b cdr-wf-util/cdr_build.gradle checkstyleMain pmdMain || true
+        run: ./gradlew -b cdr_build.gradle checkstyleMain pmdMain || true
 
       - name: Upload Checkstyle HTML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: checkstyle-html
-          path: cdr-wf-util/build/reports/checkstyle/main.html
+          path: build/reports/checkstyle/main.html
 
       - name: Upload Checkstyle XML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: checkstyle-xml
-          path: cdr-wf-util/build/reports/checkstyle/main.xml
+          path: build/reports/checkstyle/main.xml
 
       - name: Upload PMD HTML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pmd-html
-          path: cdr-wf-util/build/reports/pmd/main.html
+          path: build/reports/pmd/main.html
 
       - name: Upload PMD XML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pmd-xml
-          path: cdr-wf-util/build/reports/pmd/main.xml
+          path: build/reports/pmd/main.xml
 
       - name: Install Python dependencies
         run: |
