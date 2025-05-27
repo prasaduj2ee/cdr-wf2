@@ -27,12 +27,15 @@ jobs:
           cd tmp-util
           git sparse-checkout set cdr_config_util
           cd ..
-          mv tmp-util/cdr_config_util ./cdr-wf-util/
+          rm -rf tmp-util
 
-      - name: List parent directory of cdr_config_util for debug
+      - name: List root directory and cdr-wf-util contents
         run: |
-          echo "📂 Listing parent directory of cdr_config_util:"
-          ls -al $(dirname cdr_config_util)      
+          echo "📂 Root directory contents:"
+          ls -al
+      
+          echo "📂 cdr-wf-util contents:"
+          ls -al cdr-wf-util      
 
       - name: Prepare util directory and generate cdr_build.gradle
         run: |          
