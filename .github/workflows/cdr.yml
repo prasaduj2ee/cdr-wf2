@@ -12,18 +12,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout main repo (Repo A)
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Checkout Repo B (config and scripts only)
-        uses: actions/checkout@v4
-        with:
-          repository: prasaduj2ee/cdr-wf-util2
-          token: ${{ secrets.CDR_WF_UTIL2_TKN_FOR_CDR_WF2 }}
-          path: cdr-wf-util
+      #- name: Checkout Repo B (shared build scripts)
+      #  uses: actions/checkout@v4
+      #  with:
+      #    repository: prasaduj2ee/cdr-wf-util2
+      #    token: ${{ secrets.CDR_WF_UTIL2_TKN_FOR_CDR_WF2 }}
 
-      - name: Generate cdr_build.gradle at root with injected config
+      - name: Sparse checkout only cdr_config_util from child repo
         run: |
+          git clone --depth 1 --filter=blob:none --sparse https://x-access-token:${{ secrets.CDR_WF_UTIL2_TKN_FOR_CDR_WF2 }}@github.com/prasaduj2ee/cdr-wf-util2.git tmp-util
+          cd tmp-util
+          git sparse-checkout set cdr_config_util
+          cd ..
+          mkdir -p cdr-wf-util
+          mv tmp-util/cdr_config_util ./cdr-wf-util/
+          rm -rf tmp-util
+
+      - name: List root directory and cdr-wf-util contents
+        run: |
+          echo "📂 Root directory contents:"
+          ls -al
+      
+          echo "📂 cdr-wf-util contents:"
+          ls -al cdr-wf-util      
+
+      - name: Prepare util directory and generate cdr_build.gradle
+        run: |          
           echo "🛠️ Injecting Checkstyle and PMD plugins into cdr_build.gradle..."
           awk '
           BEGIN { inside_plugins = 0 }
@@ -34,9 +51,9 @@ jobs:
               next
             }
             if (inside_plugins && $0 ~ /^[[:space:]]*}/) {
-              print "    // Added by CI: static analysis plugins"
-              print "    id '\''checkstyle'\''"
-              print "    id '\''pmd'\''"
+              printf "    // Added by CI: static analysis plugins\n"
+              printf "    id '\''checkstyle'\''\n"
+              printf "    id '\''pmd'\''\n"
               inside_plugins = 0
             }
             print
@@ -44,8 +61,8 @@ jobs:
 
           mv cdr_build.gradle.tmp cdr_build.gradle
 
-          echo -e "\n// Added by CI: static analysis config from chk_pmd.gradle\n" >> cdr_build.gradle
-          cat cdr-wf-util/chk_pmd.gradle >> cdr_build.gradle
+          printf "\n// Added by CI: static analysis config from chk_pmd.gradle\n\n" >> cdr_build.gradle
+          cat cdr-wf-util/cdr_config_util/chk_pmd.gradle >> cdr_build.gradle
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -93,7 +110,7 @@ jobs:
           pip install requests openai
 
       - name: Post PR comment with static analysis results
-        run: python cdr-wf-util/scripts/comment_on_violations.py
+        run: python cdr-wf-util/cdr_config_util/scripts/comment_on_violations.py
         env:
           GITHUB_TOKEN: ${{ secrets.CDR2_TKN1 }}
           REPO: ${{ github.repository }}
