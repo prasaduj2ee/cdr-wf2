@@ -55,4 +55,16 @@ public class TestMain {
         }
     }
 
+    public static void m5(String[] args123) {
+        System.out.printf("Hello and welcome new !");
+        args123 = new String[]{"arg1", "arg2"};
+        String xyaz = "Hello1";
+        int yaz = 123;
+
+        for (int i = 1; i <= 5; i++) {
+            int j = i * 2;
+            System.out.println("i = " + i);
+        }
+    }
+
 }
