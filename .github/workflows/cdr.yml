@@ -25,10 +25,7 @@ jobs:
       - name: Prepare util directory and generate cdr_build.gradle
         run: |
           echo "📄 Copying build.gradle and src folder to util/"
-          cp build.gradle cdr-wf-util/build.gradle
-          rm -rf cdr-wf-util/src
-          cp -r src cdr-wf-util/src
-
+          
           echo "🛠️ Injecting Checkstyle and PMD plugins into cdr_build.gradle..."
           awk '
           BEGIN { inside_plugins = 0 }
@@ -45,12 +42,12 @@ jobs:
               inside_plugins = 0
             }
             print
-          }' build.gradle > cdr-wf-util/cdr_build.gradle.tmp
+          }' build.gradle > cdr_build.gradle.tmp
 
           mv cdr-wf-util/cdr_build.gradle.tmp cdr-wf-util/cdr_build.gradle
 
           printf "\n// Added by CI: static analysis config from chk_pmd.gradle\n\n" >> cdr_build.gradle
-          cat cdr-wf-util/chk_pmd.gradle >> cdr-wf-util/cdr_build.gradle
+          cat cdr-wf-util/chk_pmd.gradle >> cdr_build.gradle
 
       - name: Set up JDK
         uses: actions/setup-java@v4
