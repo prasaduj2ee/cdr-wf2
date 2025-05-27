@@ -29,6 +29,11 @@ jobs:
           cd ..
           mv tmp-util/cdr_config_util ./cdr-wf-util/
 
+      - name: List parent directory of cdr_config_util for debug
+        run: |
+          echo "📂 Listing parent directory of cdr_config_util:"
+          ls -al $(dirname cdr_config_util)      
+
       - name: Prepare util directory and generate cdr_build.gradle
         run: |          
           echo "🛠️ Injecting Checkstyle and PMD plugins into cdr_build.gradle..."
