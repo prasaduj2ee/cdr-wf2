@@ -27,6 +27,8 @@ jobs:
           cd tmp-util
           git sparse-checkout set cdr_config_util
           cd ..
+          mkdir -p cdr-wf-util
+          mv tmp-util/cdr_config_util ./cdr-wf-util/
           rm -rf tmp-util
 
       - name: List root directory and cdr-wf-util contents
