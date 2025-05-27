@@ -15,11 +15,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Checkout Repo B (shared build scripts)
-        uses: actions/checkout@v4
-        with:
-          repository: prasaduj2ee/cdr-wf-util2
-          token: ${{ secrets.CDR_WF_UTIL2_TKN_FOR_CDR_WF2 }}
+      #- name: Checkout Repo B (shared build scripts)
+      #  uses: actions/checkout@v4
+      #  with:
+      #    repository: prasaduj2ee/cdr-wf-util2
+      #    token: ${{ secrets.CDR_WF_UTIL2_TKN_FOR_CDR_WF2 }}
+
+      - name: Sparse checkout only cdr_config_util from child repo
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse https://x-access-token:${{ secrets.CDR_WF_UTIL2_TKN_FOR_CDR_WF2 }}@github.com/prasaduj2ee/cdr-wf-util2.git tmp-util
+          cd tmp-util
+          git sparse-checkout set cdr_config_util
+          cd ..
+          mv tmp-util/cdr_config_util ./cdr-wf-util/
 
       - name: Prepare util directory and generate cdr_build.gradle
         run: |          
