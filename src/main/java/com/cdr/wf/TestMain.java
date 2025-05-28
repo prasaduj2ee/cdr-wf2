@@ -11,7 +11,7 @@ public class TestMain {
 
         for (int i = 1; i <= 5; i++) {
             int j = i * 2;
-        System.out.println("i = " + i);
+            System.out.println("i = " + i);
         }
     }
 
@@ -25,34 +25,16 @@ public class TestMain {
         String xyaz = "Hello";
         int yaz = 123;
 
-        for (int i = 1; i <= 5; i++) {
+        for (int i = 1; i <= 5; i++)
+        {
+            if (true) System.out.println("This is a test");
             int j = i * 2;
             System.out.println("i = " + i);
+            String Tewrewr = "This is a message";
+            int m = 10;
+            for (int k = 0; k < 5; k++) {
+                System.out.println("k = " + k+m);
+            }
         }
     }
-
-    public static void m3(String[] args123) {
-        System.out.printf("Hello and welcome new !");
-        args123 = new String[]{"arg1", "arg2"};
-        String xyaz = "Hello1";
-        int yaz = 123;
-
-        for (int i = 1; i <= 5; i++) {
-            int j = i * 2;
-            System.out.println("i = " + i);
-        }
-    }
-
-    public static void m4(String[] args123) {
-        System.out.printf("Hello and welcome new !");
-        args123 = new String[]{"arg1", "arg2"};
-        String xyaz = "Hello1";
-        int yaz = 123;
-
-        for (int i = 1; i <= 5; i++) {
-            int j = i * 2;
-            System.out.println("i = " + i);
-        }
-    }
-
 }
