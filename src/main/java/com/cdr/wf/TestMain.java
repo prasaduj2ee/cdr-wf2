@@ -25,7 +25,9 @@ public class TestMain {
         String xyaz = "Hello";
         int yaz = 123;
 
-        for (int i = 1; i <= 5; i++) {
+        for (int i = 1; i <= 5; i++)
+        {
+            if (true) System.out.println("This is a test");
             int j = i * 2;
             System.out.println("i = " + i);
             String message = "This is a message";
