@@ -23,7 +23,7 @@ jobs:
           key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: gradle-${{ runner.os }}-
 
-      - name: 🔍 Sparse checkout: cdr_config_util from shared repo
+      - name: 🔍 Sparse checkout only cdr_config_util from shared repo
         run: |
           git clone --depth 1 --filter=blob:none --sparse https://x-access-token:${{ secrets.CDR_WF_UTIL2_TKN_FOR_CDR_WF2 }}@github.com/prasaduj2ee/cdr-wf-util2.git tmp-util
           cd tmp-util
