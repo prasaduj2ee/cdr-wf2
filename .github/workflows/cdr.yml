@@ -2,8 +2,7 @@ name: Java Code Review with Gradle + GitHub API Comments
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
     types: [opened, synchronize]
 
@@ -12,36 +11,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      #- name: Checkout Repo B (shared build scripts)
-      #  uses: actions/checkout@v4
-      #  with:
-      #    repository: prasaduj2ee/cdr-wf-util2
-      #    token: ${{ secrets.CDR_WF_UTIL2_TKN_FOR_CDR_WF2 }}
+      - name: 💾 Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: gradle-${{ runner.os }}-
 
-      - name: Sparse checkout only cdr_config_util from child repo
+      - name: 🔍 Sparse checkout: cdr_config_util from shared repo
         run: |
           git clone --depth 1 --filter=blob:none --sparse https://x-access-token:${{ secrets.CDR_WF_UTIL2_TKN_FOR_CDR_WF2 }}@github.com/prasaduj2ee/cdr-wf-util2.git tmp-util
           cd tmp-util
           git sparse-checkout set cdr_config_util
+          mkdir -p ../cdr-wf-util
+          mv cdr_config_util ../cdr-wf-util/
           cd ..
-          mkdir -p cdr-wf-util
-          mv tmp-util/cdr_config_util ./cdr-wf-util/
           rm -rf tmp-util
 
-      - name: List root directory and cdr-wf-util contents
+      - name: 📂 Show directories
         run: |
-          echo "📂 Root directory contents:"
+          echo "Root Directory:"
           ls -al
-      
-          echo "📂 cdr-wf-util contents:"
-          ls -al cdr-wf-util      
+          echo "cdr-wf-util Contents:"
+          ls -al cdr-wf-util
 
-      - name: Prepare util directory and generate cdr_build.gradle
-        run: |          
-          echo "🛠️ Injecting Checkstyle and PMD plugins into cdr_build.gradle..."
+      - name: 🛠️ Inject Checkstyle & PMD plugins into custom Gradle build file
+        run: |
           awk '
           BEGIN { inside_plugins = 0 }
           {
@@ -51,67 +51,49 @@ jobs:
               next
             }
             if (inside_plugins && $0 ~ /^[[:space:]]*}/) {
-              printf "    // Added by CI: static analysis plugins\n"
-              printf "    id '\''checkstyle'\''\n"
-              printf "    id '\''pmd'\''\n"
+              print "    // Added by CI: static analysis plugins"
+              print "    id '\''checkstyle'\''"
+              print "    id '\''pmd'\''"
               inside_plugins = 0
             }
             print
           }' build.gradle > cdr_build.gradle.tmp
-
           mv cdr_build.gradle.tmp cdr_build.gradle
-
-          printf "\n// Added by CI: static analysis config from chk_pmd.gradle\n\n" >> cdr_build.gradle
+          echo -e "\n// Added by CI: static analysis config from chk_pmd.gradle\n" >> cdr_build.gradle
           cat cdr-wf-util/cdr_config_util/chk_pmd.gradle >> cdr_build.gradle
 
-      - name: Set up JDK
+      - name: ☕ Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Grant execute permission to gradlew
+      - name: ✅ Make Gradle wrapper executable
         run: chmod +x ./gradlew
 
-      - name: Run Checkstyle and PMD (continue on violations)
-        run: ./gradlew -b cdr_build.gradle checkstyleMain pmdMain || true
+      - name: 🔎 Run Checkstyle & PMD
+        run: ./gradlew -b cdr_build.gradle checkstyleMain pmdMain || echo "Static analysis found issues"
 
-      - name: Upload Checkstyle HTML Report
+      - name: 📤 Upload static analysis reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: checkstyle-html
-          path: build/reports/checkstyle/main.html
+          name: static-analysis-reports
+          path: |
+            build/reports/checkstyle/main.html
+            build/reports/checkstyle/main.xml
+            build/reports/pmd/main.html
+            build/reports/pmd/main.xml
+          retention-days: 1
 
-      - name: Upload Checkstyle XML Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: checkstyle-xml
-          path: build/reports/checkstyle/main.xml
+      - name: 🐍 Install Python dependencies
+        run: pip install -r cdr-wf-util/cdr_config_util/scripts/requirements.txt
 
-      - name: Upload PMD HTML Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: pmd-html
-          path: build/reports/pmd/main.html
-
-      - name: Upload PMD XML Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: pmd-xml
-          path: build/reports/pmd/main.xml
-
-      - name: Install Python dependencies
-        run: |
-          pip install --upgrade pip
-          pip install requests openai
-
-      - name: Post PR comment with static analysis results
+      - name: 💬 Comment on PR with static analysis results
         run: python cdr-wf-util/cdr_config_util/scripts/comment_on_violations.py
         env:
           GITHUB_TOKEN: ${{ secrets.CDR2_TKN1 }}
-          REPO: ${{ github.repository }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number || 0 }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          GITHUB_REF: ${{ github.ref }}
