@@ -33,13 +33,6 @@ jobs:
           cd ..
           rm -rf tmp-util
 
-      - name: 📂 Show directories
-        run: |
-          echo "Root Directory:"
-          ls -al
-          echo "cdr-wf-util Contents:"
-          ls -al cdr-wf-util
-
       - name: 🛠️ Inject Checkstyle & PMD plugins into custom Gradle build file
         run: |
           awk '
