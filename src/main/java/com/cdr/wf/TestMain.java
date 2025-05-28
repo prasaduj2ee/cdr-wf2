@@ -11,7 +11,7 @@ public class TestMain {
 
         for (int i = 1; i <= 5; i++) {
             int j = i * 2;
-        System.out.println("i = " + i);
+            System.out.println("i = " + i);
         }
     }
 
@@ -28,11 +28,11 @@ public class TestMain {
         for (int i = 1; i <= 5; i++) {
             int j = i * 2;
             System.out.println("i = " + i);
-              String message = "This is a message";
-               int m = 10;
-               for (int k = 0; k < 5; k++) {
-                    System.out.println("k = " + k+m);
-                 }
+            String message = "This is a message";
+            int m = 10;
+            for (int k = 0; k < 5; k++) {
+                System.out.println("k = " + k+m);
+            }
         }
     }
 }
