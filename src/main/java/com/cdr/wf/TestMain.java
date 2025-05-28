@@ -30,7 +30,7 @@ public class TestMain {
             if (true) System.out.println("This is a test");
             int j = i * 2;
             System.out.println("i = " + i);
-            String tewrewr = "This is a message";
+            String Tewrewr = "This is a message";
             int m = 10;
             for (int k = 0; k < 5; k++) {
                 System.out.println("k = " + k+m);
